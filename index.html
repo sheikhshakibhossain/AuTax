@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AuTax</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            background-color: black;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        #map { 
+            flex: 2;
+            height: 100%;
+        }
+        #waypoints {
+            width: 100%;
+            height: 150px;
+        }
+        .container {
+            display: flex;
+            height: 100%;
+            flex-direction: row;
+        }
+        .controls {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        .controls button {
+            margin: 10px 0;
+            padding: 10px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="map"></div>
+        <div class="controls">
+            <textarea id="waypoints" readonly></textarea>
+            <button id="addWaypoint">Add Stops</button>
+            <button id="startMission">Start Navigation</button>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/roslib/build/roslib.min.js"></script>
+    <script>
+        // Initialize the map and set its view to the specified coordinates and zoom level
+        var map = L.map('map', { attributionControl: false }).setView([23.799, 90.449], 15);
+
+        // Add a tile layer to the map
+        L.tileLayer('UIU_Map/{z}/{x}/{y}.jpg').addTo(map);
+
+        // Connect to ROS
+        var ros = new ROSLIB.Ros({
+            url : 'ws://localhost:9090'
+        });
+
+        // Define the waypoint topic
+        var waypointTopic = new ROSLIB.Topic({
+            ros : ros,
+            name : '/waypoint',
+            messageType : 'sensor_msgs/NavSatFix'
+        });
+
+        // Array to store waypoints
+        var waypoints = [];
+        var polyline = L.polyline([]).addTo(map); // Create a polyline and add it to the map
+
+        // Function to add a waypoint
+        function addWaypoint(lat, lng) {
+            var waypointNumber = waypoints.length + 1;
+            L.marker([lat, lng]).addTo(map)
+                .bindPopup('Waypoint ' + waypointNumber + ' at ' + lat + ', ' + lng)
+                .bindTooltip(String(waypointNumber), {permanent: true, className: "waypoint-label", offset: [0, 0]});
+
+            waypoints.push([lat, lng]);
+            polyline.setLatLngs(waypoints); // Update the polyline with the new waypoints
+
+            var waypointsTextBox = document.getElementById('waypoints');
+            waypointsTextBox.value += 'Stop ' + waypointNumber + ': Lat: ' + lat + ', Lng: ' + lng + '\n';
+        }
+
+        // Add click event listener to the "Add Waypoint" button
+        document.getElementById('addWaypoint').addEventListener('click', function() {
+            map.once('click', function(e) {
+                var lat = e.latlng.lat;
+                var lng = e.latlng.lng;
+                addWaypoint(lat, lng);
+            });
+        });
+
+        // Function to publish waypoints
+        function publishWaypoints() {
+            waypoints.forEach(function(waypoint, index) {
+                var position_covariance_type_value = (index === waypoints.length - 1) ? 1 : 0;
+
+                var waypointMsg = new ROSLIB.Message({
+                    header : {
+                        stamp : { secs : Math.floor(Date.now() / 1000), nsecs : (Date.now() % 1000) * 1000000 },
+                        frame_id : 'map'
+                    },
+                    status : { status : 0, service : 1 },
+                    latitude : waypoint[0],
+                    longitude : waypoint[1],
+                    altitude : 0,
+                    position_covariance : [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    position_covariance_type : position_covariance_type_value
+                });
+
+                waypointTopic.publish(waypointMsg);
+            });
+            
+        }
+
+        // Add click event listener to the "Start Mission" button
+        document.getElementById('startMission').addEventListener('click', function() {
+            publishWaypoints();
+        });
+    </script>
+</body>
+</html>
