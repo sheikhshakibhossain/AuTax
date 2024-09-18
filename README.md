@@ -22,17 +22,18 @@
 
 ## Setup Raspberry Pi
 1. Connecting Raspberry Pi to L298N:
-    - IN1/IN2 (left motor) should connect to GPIO 17 and GPIO 27.
-    - IN3/IN4 (right motor) should connect to GPIO 23 and GPIO 24.
+    - IN1/IN2 (left motor) should connect to GPIO 11 and GPIO 12.
+    - IN3/IN4 (right motor) should connect to GPIO 13 and GPIO 17.
+
+
+# Motor A (Left Motor)
+LEFT_MOTOR_FORWARD_PIN = 11 # yellow
+LEFT_MOTOR_BACKWARD_PIN = 12 # blue
+
+# Motor B (Right Motor)
+RIGHT_MOTOR_FORWARD_PIN = 13 # purple
+RIGHT_MOTOR_BACKWARD_PIN = 17 # orange
+
 ```bash
 sudo apt install python3-rpi.gpio
 ```
-
-
-
-
-Roadmap
-
-1. js
-2. asyncronous programming
-3. 
