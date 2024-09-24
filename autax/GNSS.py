@@ -50,8 +50,8 @@ class GNSS(Node):
         self.nav_sat_topic = '/nav_sat'
         self.nav_sat_pub = self.create_publisher(NavSatFix, self.nav_sat_topic, 10)
         
-        self.gps_port = self.find_serial_device_by_vid_pid(1659) # vid = 1659 of our ttl cable | 6790 for battery ttl
-        self.gps_baudrate = 115200
+        self.gps_port = self.find_serial_device_by_vid_pid(6790) # vid = 1659 of our ttl cable | 6790 for battery ttl
+        self.gps_baudrate = 9600
         self.gps_ser = serial.Serial(self.gps_port, baudrate=self.gps_baudrate, timeout=0.5)
         self.get_logger().info(f'Opened GPS Serial at port={self.gps_port}, baudrate={self.gps_baudrate}')
 
