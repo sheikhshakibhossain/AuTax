@@ -9,7 +9,7 @@ import pynmea2
 from rclpy.node import Node
 from sensor_msgs.msg import NavSatFix
 from geometry_msgs.msg import Twist, Vector3
-import ros2_rover.ManualControl as ManualControl
+# import ros2_rover.ManualControl as ManualControl
 
 
 class GNSS(Node):
@@ -38,10 +38,7 @@ class GNSS(Node):
         self.currentLat = 0.0
         self.currentLong = 0.0
         self.distanceToTarget = 10
-        self.current_waypoint = 1
         self.flag = 0
-        self.targetList = []
-        self.load_waypoint_list()
 
         self.cmd_vel_topic = '/cmd_vel'
         self.cmd_vel_pub = self.create_publisher(Twist, self.cmd_vel_topic, 10)
@@ -69,21 +66,12 @@ class GNSS(Node):
         return target_port
 
 
-    def load_waypoint_list(self):
-        documents_dir = os.path.expanduser('~/') + '.GPS_Coordinate_Loader_GUI'
-        file_path = os.path.join(documents_dir, 'gps_data.json')
-        if os.path.exists(file_path):
-            with open(file_path, 'r') as file:
-                self.targetList = json.load(file)
-        else:
-            self.get_logger().info(f'File not found: {file_path}')
-
-    def load_target_waypoint(self):
+    def load_target_waypoint(self, lat, long):
         try:
-            self.targetLat = float(self.targetList[self.current_waypoint][0])
-            self.targetLong = float(self.targetList[self.current_waypoint][1])
-            self.get_logger().info(f'Waypoint {self.current_waypoint}: {self.targetLat}, {self.targetLong}\nWaiting 10 seconds ...')
-            time.sleep(10)
+            self.targetLat = float(lat)
+            self.targetLong = float(long)
+            self.get_logger().info(f'Waypoint {self.current_waypoint}: {self.targetLat}, {self.targetLong}\nWaiting 5 seconds ...')
+            time.sleep(5)
 
         except Exception as coordinate_exception:
             self.get_logger().info(f'load_target_waypoint: {coordinate_exception}')
@@ -253,10 +241,9 @@ class GNSS(Node):
             self.get_logger().info(f'error in publish_nav_sat_data(): {e}')
 
 
-    def navigate(self, publisher, target):
+    def navigate(self, publisher, target_lat, target_long):
         
-        self.current_waypoint = target
-        self.load_target_waypoint()
+        self.load_target_waypoint(target_lat, target_long)
         self.flag = 0
 
         try:
@@ -274,7 +261,7 @@ class GNSS(Node):
 
                 if self.flag == 1:
                     self.stop_car()
-                    self.get_logger().info(f'GPS.navigate() terminates with -> GNSS Reached {target}')
+                    self.get_logger().info(f'GPS.navigate() terminates with -> GNSS Reached {target_lat}, {target_long}')
                     break
 
                 elif self.flag == 0:
@@ -300,10 +287,10 @@ class GNSS(Node):
                                 self.flag = 1
                                 break
 
-                            if self.distanceToTarget > 1.0:
-                                ManualControl.sleep_while_avoiding_obstacle_is_on(publisher)
+                            # if self.distanceToTarget > 1.0:
+                            #     ManualControl.sleep_while_avoiding_obstacle_is_on(publisher)
                             
-                            ManualControl.sleep_while_teleop_is_ongoing(publisher)
+                            # ManualControl.sleep_while_teleop_is_ongoing(publisher)
                             
                             self.currentHeading = self.read_compass()
                             while self.gps_ser.in_waiting > 0: # take fresh serial data
@@ -326,15 +313,15 @@ class GNSS(Node):
                                 self.flag = 0
                                 break
 
-                            ManualControl.sleep_while_teleop_is_ongoing(publisher)
+                            # ManualControl.sleep_while_teleop_is_ongoing(publisher)
 
-                            if self.distanceToTarget > 1.0:
-                                ManualControl.sleep_while_avoiding_obstacle_is_on(publisher)
+                            # if self.distanceToTarget > 1.0:
+                            #     ManualControl.sleep_while_avoiding_obstacle_is_on(publisher)
 
                     else:
                         self.stop_car()
 
-                ManualControl.sleep_while_teleop_is_ongoing(publisher)
+                # ManualControl.sleep_while_teleop_is_ongoing(publisher)
 
         except KeyboardInterrupt:
             self.get_logger().info('Keyboard interrupt. Exiting...')

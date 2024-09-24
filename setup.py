@@ -21,6 +21,7 @@ setup(
     entry_points={
         'console_scripts': [
             'drive = autax.drive:main',
+            'self_control = autax.control:main',
         ],
     },
 )
