@@ -18,7 +18,10 @@ class Control(Node):
 
     def listener_callback(self, msg):
         self.get_logger().info(f'Received waypoint: Latitude: {msg.latitude}, Longitude: {msg.longitude}, Altitude: {msg.altitude}')
-        self.GPS.navigate(publisher=self, target_lat=msg.latitude, target_long=msg.longitude)
+        try:
+            self.GPS.navigate(publisher=self, target_lat=msg.latitude, target_long=msg.longitude)
+        except KeyboardInterrupt:
+            self.get_logger().info('keyboard interrupt')
         self.goalTest(msg)
 
     def goalTest(self, msg):
