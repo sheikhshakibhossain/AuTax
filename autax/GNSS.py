@@ -70,7 +70,7 @@ class GNSS(Node):
         try:
             self.targetLat = float(lat)
             self.targetLong = float(long)
-            self.get_logger().info(f'Waypoint {self.current_waypoint}: {self.targetLat}, {self.targetLong}\nWaiting 5 seconds ...')
+            # self.get_logger().info(f'Waypoint {self.current_waypoint}: {self.targetLat}, {self.targetLong}\nWaiting 5 seconds ...')
             time.sleep(5)
 
         except Exception as coordinate_exception:
@@ -201,7 +201,7 @@ class GNSS(Node):
     def processGPS(self):
         try:
             self.nmea_msg = self.gps_ser.readline()
-            if self.nmea_msg.startswith((b'$GNGGA', b'$GNRMC', b'$GPGGA', b'$GPRMC')):
+            if self.nmea_msg.startswith((b'$GNGGA', b'$GNRMC', b'$GPGGA', b'$GPRMC', b'$GNGLL')):
                 self.nmea_msg_str = self.nmea_msg.decode('utf-8')
                 self.gps_data = pynmea2.parse(self.nmea_msg_str)
                 self.currentLat = float(self.gps_data.latitude)

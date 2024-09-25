@@ -1,31 +1,52 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>AuTax</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
     <style>
-        body, html {
+        body,
+        html {
             height: 100%;
             margin: 0;
-            background-color: black;
+            background: linear-gradient(135deg, #2c3e50, #4ca1af);
+            /* Sophisticated gradient */
             color: white;
             font-family: Arial, sans-serif;
         }
-        #map { 
+
+        #map {
             flex: 2;
-            height: 100%;
+            /* Maintain original flex structure for the map */
+            /* height: 100%; */
+            border-radius: 20px 20px 20px 20px;
+            transition: transform 0.2s ease-in-out;
+            /* Add smooth transition */
+            /* height: 100%; */
+            /* width: 10%; */
+            margin-top: 10px;
+            margin-left: 10px;
+            margin-bottom: 10px;
+            border-style: dashed;
+            border-color: white;
         }
+
         #waypoints {
-            width: 100%;
+            width: 99%;
             height: 150px;
+            border-radius: 10px 10px 10px 10px;
+            border-color: black;
+            border-style: dashed;
         }
+
         .container {
             display: flex;
             height: 100%;
             flex-direction: row;
         }
+
         .controls {
             flex: 1;
             display: flex;
@@ -33,13 +54,32 @@
             padding: 10px;
             box-sizing: border-box;
         }
+
         .controls button {
             margin: 10px 0;
-            padding: 10px;
+            padding: 15px;
             font-size: 16px;
+            color: white;
+            background: linear-gradient(135deg, #3498db, #2ecc71);
+            /* Gradient for buttons */
+            border: none;
+            border-radius: 50px;
+            /* Rounded buttons for modern look */
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
+            /* Button shadow */
+        }
+
+        .controls button:hover {
+            transform: translateY(-5px);
+            /* Subtle lift on hover */
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.4);
+            /* Deepened shadow on hover */
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <div id="map"></div>
@@ -61,14 +101,14 @@
 
         // Connect to ROS
         var ros = new ROSLIB.Ros({
-            url : 'ws://localhost:9090'
+            url: 'ws://localhost:9090'
         });
 
         // Define the waypoint topic
         var waypointTopic = new ROSLIB.Topic({
-            ros : ros,
-            name : '/waypoint',
-            messageType : 'sensor_msgs/NavSatFix'
+            ros: ros,
+            name: '/waypoint',
+            messageType: 'sensor_msgs/NavSatFix'
         });
 
         // Array to store waypoints
@@ -80,7 +120,7 @@
             var waypointNumber = waypoints.length + 1;
             L.marker([lat, lng]).addTo(map)
                 .bindPopup('Waypoint ' + waypointNumber + ' at ' + lat + ', ' + lng)
-                .bindTooltip(String(waypointNumber), {permanent: true, className: "waypoint-label", offset: [0, 0]});
+                .bindTooltip(String(waypointNumber), { permanent: true, className: "waypoint-label", offset: [0, 0] });
 
             waypoints.push([lat, lng]);
             polyline.setLatLngs(waypoints); // Update the polyline with the new waypoints
@@ -90,8 +130,8 @@
         }
 
         // Add click event listener to the "Add Waypoint" button
-        document.getElementById('addWaypoint').addEventListener('click', function() {
-            map.once('click', function(e) {
+        document.getElementById('addWaypoint').addEventListener('click', function () {
+            map.once('click', function (e) {
                 var lat = e.latlng.lat;
                 var lng = e.latlng.lng;
                 addWaypoint(lat, lng);
@@ -100,31 +140,32 @@
 
         // Function to publish waypoints
         function publishWaypoints() {
-            waypoints.forEach(function(waypoint, index) {
+            waypoints.forEach(function (waypoint, index) {
                 var position_covariance_type_value = (index === waypoints.length - 1) ? 1 : 0;
 
                 var waypointMsg = new ROSLIB.Message({
-                    header : {
-                        stamp : { secs : Math.floor(Date.now() / 1000), nsecs : (Date.now() % 1000) * 1000000 },
-                        frame_id : 'map'
+                    header: {
+                        stamp: { secs: Math.floor(Date.now() / 1000), nsecs: (Date.now() % 1000) * 1000000 },
+                        frame_id: 'map'
                     },
-                    status : { status : 0, service : 1 },
-                    latitude : waypoint[0],
-                    longitude : waypoint[1],
-                    altitude : 0,
-                    position_covariance : [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                    position_covariance_type : position_covariance_type_value
+                    status: { status: 0, service: 1 },
+                    latitude: waypoint[0],
+                    longitude: waypoint[1],
+                    altitude: 0,
+                    position_covariance: [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    position_covariance_type: position_covariance_type_value
                 });
 
                 waypointTopic.publish(waypointMsg);
             });
-            
+
         }
 
         // Add click event listener to the "Start Mission" button
-        document.getElementById('startMission').addEventListener('click', function() {
+        document.getElementById('startMission').addEventListener('click', function () {
             publishWaypoints();
         });
     </script>
 </body>
+
 </html>
