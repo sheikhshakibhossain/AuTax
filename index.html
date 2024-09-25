@@ -123,7 +123,7 @@
     <script>
         // Initialize the map and set its view to the specified coordinates and zoom level
         var map = L.map('map', { attributionControl: false }).setView([23.799, 90.449], 18);
-        const tileURL = 'UIU_Map/{z}/{x}/{y}.jpg'
+        const tileURL = 'resource/UIU_Map/{z}/{x}/{y}.jpg'
         L.tileLayer(tileURL, {
             minZoom: 15,
             maxZoom: 20,
@@ -174,7 +174,7 @@
             if (!arrowMarker) {
                 arrowMarker = L.marker([lat, long], {
                     icon: L.icon({
-                        iconUrl: 'car_red.png', // Replace with your arrow icon path
+                        iconUrl: 'resource/car_red.png', // Replace with your arrow icon path
                         iconSize: [30, 35], // Size of the icon
                         iconAnchor: [12, 12] // Point of the icon which will correspond to marker's location
                     })
