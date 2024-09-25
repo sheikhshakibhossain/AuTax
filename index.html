@@ -40,6 +40,8 @@
             border-radius: 10px 10px 10px 10px;
             border-color: black;
             border-style: dashed;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
         }
 
         .container {
@@ -88,12 +90,15 @@
             overflow: hidden;
             /* Prevent overflow */
         }
-
+        .camera h2 {
+            margin-top: 150px;
+            margin-left: 180px;
+            font-weight: normal;
+            color: rgba(255, 255, 255, 0.7); /* Example of a faded white */
+        }
         .camera img {
             width: 100%;
-            /* Make image fill the width */
             height: 100%;
-            /* Make image fill the height */
             object-fit: contain;
         }
     </style>
@@ -107,7 +112,8 @@
             <button id="addWaypoint">Add Stops</button>
             <button id="startMission">Start Navigation</button>
             <div class="camera">
-                <img id="image_sub">
+                <img id="image_sub" alt=" ">
+                <h2>No Camera Feed ☹️</h2>
             </div>
         </div>
     </div>
