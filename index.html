@@ -115,6 +115,8 @@
                 <img id="image_sub" alt=" ">
                 <h2>No Camera Feed ☹️</h2>
             </div>
+            <button id="emergencySTOP">Emergency STOP</button>
+            <button id="emergencyRESUME">Emergency RESUME</button>
         </div>
     </div>
 
@@ -236,6 +238,45 @@
                 var lng = e.latlng.lng;
                 addWaypoint(lat, lng);
             });
+        });
+
+
+        // Add click event listener to the "Emergency STOP" button
+        document.getElementById('emergencySTOP').addEventListener('click', function () {
+            // Create a new ROS message
+            const emergencyMessage = new ROSLIB.Message({
+                data: 'STOP'
+            });
+
+            // Create a publisher for the /emergency topic
+            const emergencyPublisher = new ROSLIB.Topic({
+                ros: ros,
+                name: '/emergency',
+                messageType: 'std_msgs/String'
+            });
+
+            // Publish the message
+            emergencyPublisher.publish(emergencyMessage);
+            console.log('Published message:', emergencyMessage.data);
+        });
+
+        // Add click event listener to the "Emergency Resume" button
+        document.getElementById('emergencyRESUME').addEventListener('click', function () {
+            // Create a new ROS message
+            const emergencyMessage = new ROSLIB.Message({
+                data: 'RESUME'
+            });
+
+            // Create a publisher for the /emergency topic
+            const emergencyPublisher = new ROSLIB.Topic({
+                ros: ros,
+                name: '/emergency',
+                messageType: 'std_msgs/String'
+            });
+
+            // Publish the message
+            emergencyPublisher.publish(emergencyMessage);
+            console.log('Published message:', emergencyMessage.data);
         });
 
         // Function to publish waypoints

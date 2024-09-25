@@ -37,6 +37,9 @@ class CmdVelSelector(Node):
         self.latest_cmd_vel = None
         self.use_gnss = True  # Start by using GNSS as the default
         self.emergency_stop = False
+        self.stop_cmd_vel = Twist()
+        self.stop_cmd_vel.linear.x = 0.0
+        self.stop_cmd_vel.angular.z = 0.0
 
         # Time of the last received message
         self.last_vision_msg_time = self.get_system_time()
@@ -90,16 +93,17 @@ class CmdVelSelector(Node):
         if self.time_difference(self.last_vision_msg_time, now) > self.timeout_duration:
             self.use_gnss = True  # Vision data is outdated, switch back to GNSS
 
-        # Check if GNSS data is also stale (timeout)
-        if self.time_difference(self.last_gnss_msg_time, now) > self.timeout_duration:
-            self.get_logger().warn('No valid data from either source, stopping publication.')
-            return  # Do not publish anything if no valid data
-
         # check if user paused it from dashboard
         if self.emergency_stop:
-            self.latest_cmd_vel.linear.x = 0.0
-            self.latest_cmd_vel.angular.z = 0.0
+            self.cmd_vel_pub.publish(self.stop_cmd_vel)
             self.get_logger().info(f'*** Emergency Protocol ***')
+            return
+
+        # Check if GNSS data is also stale (timeout)
+        if self.time_difference(self.last_gnss_msg_time, now) > self.timeout_duration:
+            self.get_logger().warn('No gnss cmd_vel msg, stopping publication.')
+            return  # Do not publish anything if no valid data
+
 
         if self.latest_cmd_vel is not None:
             self.cmd_vel_pub.publish(self.latest_cmd_vel)
