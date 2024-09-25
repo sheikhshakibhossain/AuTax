@@ -53,9 +53,9 @@ class MotorController(Node):
         elif left_speed < 0 and right_speed < 0:
             self.get_logger().info('Moving Backward')
         elif left_speed > right_speed:
-            self.get_logger().info('Turning Left')
-        elif right_speed > left_speed:
             self.get_logger().info('Turning Right')
+        elif right_speed > left_speed:
+            self.get_logger().info('Turning Left')
         elif left_speed == 0 and right_speed == 0:
             self.get_logger().info('Stopping')
 
