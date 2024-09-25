@@ -40,7 +40,7 @@ class GNSS(Node):
         self.distanceToTarget = 10
         self.flag = 0
 
-        self.cmd_vel_topic = '/cmd_vel'
+        self.cmd_vel_topic = '/gnss/cmd_vel'
         self.cmd_vel_pub = self.create_publisher(Twist, self.cmd_vel_topic, 10)
 
         self.nmea_msg = None

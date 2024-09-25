@@ -20,8 +20,10 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'drive = autax.drive:main',
-            'self_control = autax.control:main',
+            'wheel = autax.wheel:main',
+            'ai_agent = autax.ai_agent:main',
+            'vision = autax.vision:main',
+            'gnss = autax.gnss:main',
         ],
     },
 )

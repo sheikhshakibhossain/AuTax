@@ -35,7 +35,8 @@
 
         #waypoints {
             width: 99%;
-            height: 150px;
+            height: 160px;
+            margin-bottom: 10px;
             border-radius: 10px 10px 10px 10px;
             border-color: black;
             border-style: dashed;
@@ -77,6 +78,24 @@
             box-shadow: 0 12px 20px rgba(0, 0, 0, 0.4);
             /* Deepened shadow on hover */
         }
+
+        .camera {
+            width: 99%;
+            height: 400px;
+            margin-top: 30px;
+            border-radius: 10px;
+            border: 1px dotted black;
+            overflow: hidden;
+            /* Prevent overflow */
+        }
+
+        .camera img {
+            width: 100%;
+            /* Make image fill the width */
+            height: 100%;
+            /* Make image fill the height */
+            object-fit: contain;
+        }
     </style>
 </head>
 
@@ -87,6 +106,9 @@
             <textarea id="waypoints" readonly></textarea>
             <button id="addWaypoint">Add Stops</button>
             <button id="startMission">Start Navigation</button>
+            <div class="camera">
+                <img id="image_sub">
+            </div>
         </div>
     </div>
 
@@ -94,14 +116,86 @@
     <script src="https://cdn.jsdelivr.net/npm/roslib/build/roslib.min.js"></script>
     <script>
         // Initialize the map and set its view to the specified coordinates and zoom level
-        var map = L.map('map', { attributionControl: false }).setView([23.799, 90.449], 15);
+        var map = L.map('map', { attributionControl: false }).setView([23.799, 90.449], 18);
+        const tileURL = 'UIU_Map/{z}/{x}/{y}.jpg'
+        L.tileLayer(tileURL, {
+            minZoom: 15,
+            maxZoom: 20,
+        }).addTo(map);
 
         // Add a tile layer to the map
-        L.tileLayer('UIU_Map/{z}/{x}/{y}.jpg').addTo(map);
+        L.tileLayer(tileURL).addTo(map);
 
         // Connect to ROS
         var ros = new ROSLIB.Ros({
             url: 'ws://localhost:9090'
+        });
+
+        // image topic
+        var imageTopic = new ROSLIB.Topic({
+            ros: ros,
+            name: '/webcam_image/compressed',
+            messageType: 'sensor_msgs/msg/CompressedImage'
+        });
+
+        imageTopic.subscribe(function (message) {
+            console.log('Received message on ' + imageTopic.name);
+            document.getElementById('image_sub').src = "data:image/jpeg;base64," + message.data;
+        });
+
+        // navsat topic
+        var gps_list = [];
+        var arrowMarker; // For the arrow marker
+        var polylineWeight = 0.5;
+        // Function to show the visited track
+        function showDot(lat, long) {
+            gps_list.push([lat, long]);
+            if (!map) {
+                setTimeout(() => {
+                    showDot(lat, long);
+                }, 100);
+                return;
+            }
+
+            // Update the polyline for the visited track
+            L.polyline(gps_list, { color: 'yellow', weight: polylineWeight }).addTo(map);
+        }
+        // Function to update the arrow marker
+        function updateArrow(lat, long) {
+            if (!map) return;
+
+            // If the arrow marker doesn't exist, create it
+            if (!arrowMarker) {
+                arrowMarker = L.marker([lat, long], {
+                    icon: L.icon({
+                        iconUrl: 'car_red.png', // Replace with your arrow icon path
+                        iconSize: [30, 35], // Size of the icon
+                        iconAnchor: [12, 12] // Point of the icon which will correspond to marker's location
+                    })
+                }).addTo(map);
+            } else {
+                // Update the position of the existing arrow marker
+                arrowMarker.setLatLng([lat, long]);
+            }
+        }
+
+        // ROS topic listener
+        const navsatfixListener = new ROSLIB.Topic({
+            ros: ros,
+            name: '/nav_sat', // navSatFix message
+            messageType: 'sensor_msgs/NavSatFix'
+        });
+
+        navsatfixListener.subscribe(function (message) {
+            const latitude = message.latitude.toFixed(7);
+            const longitude = message.longitude.toFixed(7);
+
+            console.log(latitude);
+            console.log(longitude);
+
+            // Update the visited track and the arrow position
+            showDot(latitude, longitude);
+            updateArrow(latitude, longitude);
         });
 
         // Define the waypoint topic
