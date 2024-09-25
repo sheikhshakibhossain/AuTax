@@ -233,10 +233,16 @@
 
         // Add click event listener to the "Add Waypoint" button
         document.getElementById('addWaypoint').addEventListener('click', function () {
+            var button = this;
+            button.style.background = 'linear-gradient(135deg, red, orange)';
+            
             map.once('click', function (e) {
                 var lat = e.latlng.lat;
                 var lng = e.latlng.lng;
                 addWaypoint(lat, lng);
+                
+                // Change button background back to original after adding waypoint
+                button.style.background = 'linear-gradient(135deg, #3498db, #2ecc71)';
             });
         });
 
@@ -258,6 +264,15 @@
             // Publish the message
             emergencyPublisher.publish(emergencyMessage);
             console.log('Published message:', emergencyMessage.data);
+            this.style.background = 'linear-gradient(135deg, red, orange)';
+
+            // restore start to default
+            const startMission = document.getElementById('startMission');
+            startMission.style.background = 'linear-gradient(135deg, #3498db, #2ecc71)';
+
+            // restore resume to default
+            const emergencyRESUME = document.getElementById('emergencyRESUME');
+            emergencyRESUME.style.background = 'linear-gradient(135deg, #3498db, #2ecc71)';
         });
 
         // Add click event listener to the "Emergency Resume" button
@@ -277,6 +292,15 @@
             // Publish the message
             emergencyPublisher.publish(emergencyMessage);
             console.log('Published message:', emergencyMessage.data);
+
+            // restore emergency to default
+            const emergencySTOP = document.getElementById('emergencySTOP');
+            emergencySTOP.style.background = 'linear-gradient(135deg, #3498db, #2ecc71)';
+            this.style.background = 'linear-gradient(135deg, red, orange)';
+
+            // restore start to selected
+            const startMission = document.getElementById('startMission');
+            startMission.style.background = 'linear-gradient(135deg, red, orange)';
         });
 
         // Function to publish waypoints
@@ -304,6 +328,7 @@
 
         // Add click event listener to the "Start Mission" button
         document.getElementById('startMission').addEventListener('click', function () {
+            this.style.background = 'linear-gradient(135deg, red, orange)';
             publishWaypoints();
         });
     </script>
