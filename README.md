@@ -37,3 +37,6 @@ RIGHT_MOTOR_BACKWARD_PIN = 17 # orange
 ```bash
 sudo apt install python3-rpi.gpio
 ```
+
+## About system
+![system architecture](resource/arch.png)
