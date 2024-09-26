@@ -213,6 +213,29 @@ class GNSS(Node):
         except Exception as e:
             self.get_logger().info(f'error in processGPS(): {e}')
 
+    def publish_nav_sat_data(self):
+        try:
+            while self.gps_ser.in_waiting > 0:
+                try:
+                    self.nmea_msg = self.gps_ser.readline()
+                    if self.nmea_msg.startswith((b'$GNGGA', b'$GNRMC', b'$GPGGA', b'$GPRMC', b'$GNGLL')):
+                        self.nmea_msg_str = self.nmea_msg.decode('utf-8')
+                        self.gps_data = pynmea2.parse(self.nmea_msg_str)
+                        self.currentLat = float(self.gps_data.latitude)
+                        self.currentLong = float(self.gps_data.longitude)
+                        self.nav_sat_msg.latitude = self.currentLat
+                        self.nav_sat_msg.longitude = self.currentLong
+                        self.nav_sat_pub.publish(self.nav_sat_msg)
+                        self.get_logger().info(f'nav_sat -> {self.currentLat}, {self.currentLong}')
+                    else:
+                        self.get_logger().info('no nav_sat available')
+                except Exception as e:
+                    self.get_logger().info(f'error in publish_nav_sat_data(): {e}')
+                
+                time.sleep(0.00001)
+            
+        except Exception as e:
+            self.get_logger().info(f'error in publish_nav_sat_data(): {e}')
 
 
     def navigate(self, publisher, target_lat, target_long):
