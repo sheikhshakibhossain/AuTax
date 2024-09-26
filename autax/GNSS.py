@@ -295,7 +295,7 @@ class GNSS(Node):
 
 
                         while self.distanceToTarget > self.distanceTolerance: # takes long route || onek shomoy ei loop a thake
-                            self.get_logger().info(f'GNSS[{self.current_waypoint}]    |    distance: {self.distanceToTarget}')
+                            self.get_logger().info(f'GNSS[{self.currentLat}, {self.currentLong}]    |    distance: {self.distanceToTarget}')
                             self.go_forward()
                             
                             while self.gps_ser.in_waiting > 0: # take fresh serial data
