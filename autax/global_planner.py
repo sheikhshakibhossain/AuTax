@@ -15,7 +15,8 @@ class Control(Node):
         self.subscription  # prevent unused variable warning
         self.GPS = GNSS()
         self.get_logger().info('global_planner initiated')
-        self.GPS.publish_nav_sat_data()
+        while self.GPS.gps_ser.in_waiting > 0:
+            self.GPS.publish_nav_sat_data()
 
     def listener_callback(self, msg):
         self.get_logger().info(f'Received waypoint: Latitude: {msg.latitude}, Longitude: {msg.longitude}, Altitude: {msg.altitude}')
