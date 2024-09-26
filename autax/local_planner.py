@@ -20,11 +20,16 @@ class ObjectDetectionNode(Node):
 
         # Object detection setup
         self.classNames = []
-        classFile = "/home/neo/ros2_ws/src/AuTax/resource/coco.names"
+        home_dir = os.path.expanduser("~")
+        base_path = os.path.join(home_dir, "ros2_ws/src/AuTax/resource")
+
+        classFile = os.path.join(base_path, "coco.names")
         with open(classFile, "rt") as f:
             self.classNames = f.read().rstrip("\n").split("\n")
-        configPath = "/home/neo/ros2_ws/src/AuTax/resource/ssd_mobilenet_v3_large_coco_2020_01_14.pbtxt"
-        weightsPath = "/home/neo/ros2_ws/src/AuTax/resource/frozen_inference_graph.pb"
+
+        configPath = os.path.join(base_path, "ssd_mobilenet_v3_large_coco_2020_01_14.pbtxt")
+        weightsPath = os.path.join(base_path, "frozen_inference_graph.pb")
+        
         self.net = cv2.dnn_DetectionModel(weightsPath, configPath)
         self.net.setInputSize(320, 320)
         self.net.setInputScale(1.0 / 127.5)
