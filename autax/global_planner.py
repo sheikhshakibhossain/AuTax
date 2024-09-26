@@ -5,7 +5,7 @@ from autax.GNSS import GNSS
 
 class Control(Node):
     def __init__(self):
-        super().__init__('gnss_control_node')
+        super().__init__('global_planner')
         self.subscription = self.create_subscription(
             NavSatFix,
             '/waypoint',
@@ -14,7 +14,7 @@ class Control(Node):
         )
         self.subscription  # prevent unused variable warning
         self.GPS = GNSS()
-        self.get_logger().info('control_node initiated')
+        self.get_logger().info('global_planner initiated')
 
     def listener_callback(self, msg):
         self.get_logger().info(f'Received waypoint: Latitude: {msg.latitude}, Longitude: {msg.longitude}, Altitude: {msg.altitude}')

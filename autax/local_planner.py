@@ -9,7 +9,7 @@ import sys
 
 class ObjectDetectionNode(Node):
     def __init__(self):
-        super().__init__('vision_node')
+        super().__init__('local_planner')
         self.publisher = self.create_publisher(CompressedImage, '/webcam_image/compressed', 10)
         self.cmd_vel_publisher = self.create_publisher(Twist, '/vision/cmd_vel', 10)
 

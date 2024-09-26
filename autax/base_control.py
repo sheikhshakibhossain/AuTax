@@ -24,14 +24,14 @@ GPIO.setup(RIGHT_MOTOR_BACKWARD_PIN, GPIO.OUT)
 class MotorController(Node):
 
     def __init__(self):
-        super().__init__('drive_node')
+        super().__init__('base_control')
         self.subscription = self.create_subscription(
             Twist,
             'cmd_vel',
             self.cmd_vel_callback,
             10)
         self.subscription
-        self.get_logger().info('Drive node initialized.')
+        self.get_logger().info('base_control node initialized.')
 
 
 

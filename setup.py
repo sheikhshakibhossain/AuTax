@@ -23,10 +23,10 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'wheel = autax.wheel:main',
+            'base_control = autax.base_control:main',
             'ai_agent = autax.ai_agent:main',
-            'vision = autax.vision:main',
-            'gnss = autax.gnss:main',
+            'local_planner = autax.local_planner:main',
+            'global_planner = autax.global_planner:main',
         ],
     },
 )

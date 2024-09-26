@@ -5,8 +5,8 @@ def generate_launch_description():
     return LaunchDescription([
         Node(
             package='autax',
-            executable='wheel',
-            name='wheel_node',
+            executable='base_control',
+            name='base_control',
             output='screen',
         ),
         Node(
@@ -17,14 +17,14 @@ def generate_launch_description():
         ),
         Node(
             package='autax',
-            executable='vision',
-            name='vision_node',
+            executable='local_planner',
+            name='local_planner',
             output='screen',
         ),
         Node(
             package='autax',
-            executable='gnss',
-            name='gnss_node',
+            executable='global_planner',
+            name='global_planner',
             output='screen',
         ),
     ])
