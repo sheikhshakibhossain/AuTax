@@ -78,6 +78,7 @@ class ObjectDetectionNode(Node):
         frame_height, frame_width, _ = frame.shape
         mid_point = frame_width // 2
         velocity_command = Twist()
+        velocity_command.linear.x = 0.75
 
         if objectInfo:  # If objects are detected
             for obj in objectInfo:

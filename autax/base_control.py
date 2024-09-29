@@ -13,6 +13,9 @@ LEFT_MOTOR_BACKWARD_PIN = 12
 RIGHT_MOTOR_FORWARD_PIN = 13
 RIGHT_MOTOR_BACKWARD_PIN = 17
 
+# PWM frequency (in Hz)
+PWM_FREQ = 100
+
 # Set GPIO mode
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
@@ -20,6 +23,18 @@ GPIO.setup(LEFT_MOTOR_FORWARD_PIN, GPIO.OUT)
 GPIO.setup(LEFT_MOTOR_BACKWARD_PIN, GPIO.OUT)
 GPIO.setup(RIGHT_MOTOR_FORWARD_PIN, GPIO.OUT)
 GPIO.setup(RIGHT_MOTOR_BACKWARD_PIN, GPIO.OUT)
+
+# Initialize PWM for each motor pin
+left_motor_forward_pwm = GPIO.PWM(LEFT_MOTOR_FORWARD_PIN, PWM_FREQ)
+left_motor_backward_pwm = GPIO.PWM(LEFT_MOTOR_BACKWARD_PIN, PWM_FREQ)
+right_motor_forward_pwm = GPIO.PWM(RIGHT_MOTOR_FORWARD_PIN, PWM_FREQ)
+right_motor_backward_pwm = GPIO.PWM(RIGHT_MOTOR_BACKWARD_PIN, PWM_FREQ)
+
+# Start the PWM with 0 duty cycle (motors off)
+left_motor_forward_pwm.start(0)
+left_motor_backward_pwm.start(0)
+right_motor_forward_pwm.start(0)
+right_motor_backward_pwm.start(0)
 
 class MotorController(Node):
 
@@ -33,8 +48,6 @@ class MotorController(Node):
         self.subscription
         self.get_logger().info('base_control node initialized.')
 
-
-
     def cmd_vel_callback(self, msg):
         linear_x = msg.linear.x
         angular_z = msg.angular.z
@@ -47,6 +60,10 @@ class MotorController(Node):
         self.drive_motors(left_motor_speed, right_motor_speed)
 
     def drive_motors(self, left_speed, right_speed):
+        # Normalize the speed values (-1 to 1) to a duty cycle (0 to 100)
+        left_duty_cycle = min(max(abs(left_speed) * 100, 0), 100)
+        right_duty_cycle = min(max(abs(right_speed) * 100, 0), 100)
+
         # Determine motion state based on motor speeds and print appropriate messages
         if left_speed > 0 and right_speed > 0:
             self.get_logger().info('Moving Forward')
@@ -61,25 +78,25 @@ class MotorController(Node):
 
         # Left motor control
         if left_speed > 0:
-            GPIO.output(LEFT_MOTOR_FORWARD_PIN, GPIO.HIGH)
-            GPIO.output(LEFT_MOTOR_BACKWARD_PIN, GPIO.LOW)
+            left_motor_forward_pwm.ChangeDutyCycle(left_duty_cycle)
+            left_motor_backward_pwm.ChangeDutyCycle(0)
         elif left_speed < 0:
-            GPIO.output(LEFT_MOTOR_FORWARD_PIN, GPIO.LOW)
-            GPIO.output(LEFT_MOTOR_BACKWARD_PIN, GPIO.HIGH)
+            left_motor_forward_pwm.ChangeDutyCycle(0)
+            left_motor_backward_pwm.ChangeDutyCycle(left_duty_cycle)
         else:
-            GPIO.output(LEFT_MOTOR_FORWARD_PIN, GPIO.LOW)
-            GPIO.output(LEFT_MOTOR_BACKWARD_PIN, GPIO.LOW)
+            left_motor_forward_pwm.ChangeDutyCycle(0)
+            left_motor_backward_pwm.ChangeDutyCycle(0)
 
         # Right motor control
         if right_speed > 0:
-            GPIO.output(RIGHT_MOTOR_FORWARD_PIN, GPIO.HIGH)
-            GPIO.output(RIGHT_MOTOR_BACKWARD_PIN, GPIO.LOW)
+            right_motor_forward_pwm.ChangeDutyCycle(right_duty_cycle)
+            right_motor_backward_pwm.ChangeDutyCycle(0)
         elif right_speed < 0:
-            GPIO.output(RIGHT_MOTOR_FORWARD_PIN, GPIO.LOW)
-            GPIO.output(RIGHT_MOTOR_BACKWARD_PIN, GPIO.HIGH)
+            right_motor_forward_pwm.ChangeDutyCycle(0)
+            right_motor_backward_pwm.ChangeDutyCycle(right_duty_cycle)
         else:
-            GPIO.output(RIGHT_MOTOR_FORWARD_PIN, GPIO.LOW)
-            GPIO.output(RIGHT_MOTOR_BACKWARD_PIN, GPIO.LOW)
+            right_motor_forward_pwm.ChangeDutyCycle(0)
+            right_motor_backward_pwm.ChangeDutyCycle(0)
 
 def main(args=None):
     rclpy.init(args=args)
