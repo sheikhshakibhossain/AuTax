@@ -75,7 +75,7 @@ class GNSS(Node):
 
     def go_forward(self):
         try:
-            twist = Twist(linear=Vector3(x=0.9), angular=Vector3(z=0.0))
+            twist = Twist(linear=Vector3(x=0.75), angular=Vector3(z=0.0))
             self.cmd_vel_pub.publish(twist)
             self.get_logger().info('forward')
             
@@ -86,10 +86,10 @@ class GNSS(Node):
         try:
             self.get_logger().info('right')
             if self.distanceToTarget > self.distanceForSteeringRotation:
-                twist = Twist(linear=Vector3(x=0.75), angular=Vector3(z=-0.25))
+                twist = Twist(linear=Vector3(x=0.75), angular=Vector3(z=-0.5))
                 self.cmd_vel_pub.publish(twist)
             else:
-                twist = Twist(linear=Vector3(x=0.0), angular=Vector3(z=-0.25))
+                twist = Twist(linear=Vector3(x=0.0), angular=Vector3(z=-0.5))
                 self.cmd_vel_pub.publish(twist)
 
         except Exception as e:
@@ -99,10 +99,10 @@ class GNSS(Node):
         try:
             self.get_logger().info('left')
             if self.distanceToTarget > self.distanceForSteeringRotation:
-                twist = Twist(linear=Vector3(x=0.75), angular=Vector3(z=0.25))
+                twist = Twist(linear=Vector3(x=0.75), angular=Vector3(z=0.5))
                 self.cmd_vel_pub.publish(twist)
             else:
-                twist = Twist(linear=Vector3(x=0.0), angular=Vector3(z=0.25))
+                twist = Twist(linear=Vector3(x=0.0), angular=Vector3(z=0.5))
                 self.cmd_vel_pub.publish(twist)
 
         except Exception as e:
@@ -122,13 +122,17 @@ class GNSS(Node):
         self.bus.write_byte_data(self.Device_Address, self.Register_mode, 0)
 
     def read_raw_data(self, addr):
-        high = self.bus.read_byte_data(self.Device_Address, addr)
-        low = self.bus.read_byte_data(self.Device_Address, addr + 1)
-        value = ((high << 8) | low)
+        try:
+            high = self.bus.read_byte_data(self.Device_Address, addr)
+            low = self.bus.read_byte_data(self.Device_Address, addr + 1)
+            value = (high << 8) | low
+            if value > 32768:
+                value = value - 65536
+            return value
+        except IOError as e:
+            self.get_logger().info(f'I2C read error at {addr}: {e}')
+            return None  # Or handle as appropriate
 
-        if value > 32768:
-            value = value - 65536
-        return value
 
     def read_compass(self):
         try:

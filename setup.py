@@ -27,6 +27,8 @@ setup(
             'ai_agent = autax.ai_agent:main',
             'local_planner = autax.local_planner:main',
             'global_planner = autax.global_planner:main',
+            'laser_scan = autax.lidar:main',
+            'localization = autax.localization:main',
         ],
     },
 )
