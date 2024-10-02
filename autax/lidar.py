@@ -10,7 +10,7 @@ class SerialToLidar(Node):
         self.publisher_ = self.create_publisher(LaserScan, '/scan', 10)
 
         # Set up the serial connection
-        self.serial_port = serial.Serial('/dev/ttyACM0', baudrate=9600, timeout=1)
+        self.serial_port = serial.Serial('/dev/ttyACM0', baudrate=115200, timeout=1)
 
         # Create a timer that runs every 0.5 seconds
         self.timer = self.create_timer(0.5, self.read_and_publish)
@@ -31,7 +31,7 @@ class SerialToLidar(Node):
         try:
             line = self.serial_port.readline().decode('utf-8').strip()
             data = line.split(',')
-            # print(data)
+            print(data)
 
             if len(data) == 6:  # Ensure we have 6 distance values
                 distances = [float(d) / 100.0 for d in data]
